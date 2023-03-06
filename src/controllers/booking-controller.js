@@ -4,13 +4,25 @@ const {BookingService} = require('../services/index');
 
 const bookingService = new BookingService();
 
-// class BookingController {
+const {createChannel,publishMessage } = require('../utils/messageQueue');
+const {REMINDER_BINDING_KEY} = require('../config/serverConfig');
 
-//     constructor(){
+class BookingController { 
+    
+    constructor(){
+        
 
-//     }
+    }
 
-  const create = async (req, res) => {
+    async sendMessageToQueue (req,res) {
+    const channel = await createChannel();
+    const data = {message:'SUCCESS'};
+    publishMessage(channel,REMINDER_BINDING_KEY,JSON.stringify(data));
+    return res.status(200).json({
+        message: 'Successfully published the event'
+    });
+    }
+     async create (req, res) {
 
     try {
         const response = await bookingService.createBooking(req.body);
@@ -24,10 +36,7 @@ const bookingService = new BookingService();
          
 
         });
-      
-
-
-
+    
     } catch (error) {
        console.log('from booking controller ERROR', error);
         return res.status(error.statusCode).json({
@@ -43,7 +52,7 @@ const bookingService = new BookingService();
 
 }
 
-
-module.exports = {
-    create
 }
+module.exports =  BookingController;
+
+
